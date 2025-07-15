@@ -1,0 +1,149 @@
+// Code your design here
+// If req is asserted , in the same cycle, gnt should be asserted
+//If req is asserted, in the next cycle gnt should be asserted
+
+module top;
+  bit clk,req,gnt;
+endmodule
+
+property p1;
+  @(posedge clk)
+  req |-> ##1 gnt;
+  req |=> gnt;
+endproperty
+
+HANDSHAKE: assert property(p);
+  
+  endmodule
+  
+sequence s1;
+  req ##1 gnt;
+  req ##0 gnt;
+endsequence
+  
+  property p;
+    @(posedge clk)
+    s1;
+  endproperty
+  
+  HANDSHAKE: assert property(p);
+    
+    //oce a is asserted, b has to be high in the same cycle, c has to be high in the next cycle, d has to beasserted after 2 clk cycles, e has to be high in the same clk cycle, f has to be high in the next 3 clk cycles
+    
+    
+    sequence s1;
+      a ##0 b;
+    endsequence
+    
+    sequence s2;
+      a ##0 e;
+    endsequence
+    
+    sequence s3;
+      a ##1 c;
+    endsequence 
+    
+    sequence s4;
+      a ##2 d;
+    endsequence
+    
+    sequence s5
+      a ##3 f;
+    endsequence
+    
+    property p;
+      @(posedge clk)
+      s1 |-> s2;
+      s1 |-> s3;
+      s1 |-> s4;
+      s1 |-> s5;
+      // s1 |-> s2 |-> s3 |-> s4 |-> s5;
+    endproperty
+    
+    HANDSHAKE: assert property(p);
+      
+      
+      
+      sequence s1;
+        a;
+      endsequence
+      
+      
+      sequence s2;
+        b;
+      endsequence
+      sequence s3;
+        c;
+      endsequence
+      
+      sequence s4;
+        d;
+      endsequence
+      
+      sequence s5;
+        e;
+      endsequence
+      
+      sequence  s6;
+        f;
+      endsequence
+      
+      property p;
+        @(posedge clk)
+        s1 |-> s2 |-> s5 |-> ##1 s3 |-> ##2 s5 |-> ##3 s6;
+        
+        
+        s1 |-> s2;
+        s1 |=> s3;
+        s1 |=> ##1 s5;
+        s1 |=> ##2 s6;
+        endproperty
+      
+      
+      
+      
+      sequence s1;
+        a ##0 b[*3];
+        a ##0 b ##1 b ##1 b ##1 b;
+      endsequence
+      
+      
+      sequence s2;
+        a ##1 c[*1]
+      endsequence
+      
+      
+      
+      sequence s1;
+        a ##0 b[2:3]
+      endsequence // timing window
+      
+      
+      // once a is hiugh, b has to be high in the next clock cycle, it should remain in the high position till the end of the simulation
+      
+      
+      property p;
+        @(posedge clk)
+        a |-> b[0:$];
+      endproperty
+      
+      
+      
+      
+      // once a is high, b can be high at anytime but it should remain high for continuosly for 3 clk cycles
+      
+      property p;
+        @(posedge clk)
+        a |-> ##2 b[*3];    // continuous
+        a |-> ##@ [b=3]     // non-continuous
+      endproperty
+      
+      
+      
+      
+      // once a is becoming low, then b has to be high for 3 non-continuous  clock cycles
+      
+      
+      property p;
+        !a |-> b[=3];
+      endproperty
