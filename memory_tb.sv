@@ -5,7 +5,7 @@
 
 `include "assertion.sv"
 
-module tb;
+module memory_tb;
   // parameters
   localparam DEPTH      = 16;
   localparam WIDTH      = 16;
